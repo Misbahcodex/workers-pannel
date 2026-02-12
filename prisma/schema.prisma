@@ -1,0 +1,174 @@
+// Worker Dashboard - Operations-focused. Do not alter auth/roles.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Auth (do not modify) ---
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String    @map("password_hash")
+  name          String
+  role          String    @default("WORKER") // WORKER | ADMIN
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  workerProfile   WorkerProfile?
+  shiftsAssigned  Shift[]         @relation("AssignedShifts")
+  leaveRequests   LeaveRequest[]
+  tasksAssigned   Task[]          @relation("AssignedTasks")
+  reports         Report[]
+  attendanceLogs  AttendanceLog[]
+  notifications   Notification[]
+  announcementsCreated Announcement[] @relation("AnnouncementAuthor")
+  shiftChangeRequests ShiftChangeRequest[]
+  announcementReads   AnnouncementRead[]
+}
+
+// --- Additive models only ---
+
+model WorkerProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique @map("user_id")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department        String?
+  emergencyContact  String?  @map("emergency_contact")
+  phone             String?
+  notificationPrefs String?  @map("notification_prefs") // JSON: email, push, etc.
+  suspended         Boolean  @default(false)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  createdBy         String?  @map("created_by")
+}
+
+model Shift {
+  id          String     @id @default(cuid())
+  workerId    String     @map("worker_id")
+  worker      User       @relation("AssignedShifts", fields: [workerId], references: [id], onDelete: Cascade)
+  date        DateTime   @map("date") // date of shift
+  startTime   String     @map("start_time") // "09:00"
+  endTime     String     @map("end_time")   // "17:00"
+  role        String?    // role for this shift
+  location    String?
+  department  String?
+  status      String     @default("SCHEDULED") // SCHEDULED | COMPLETED | CANCELLED | ON_LEAVE
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  createdBy   String?    @map("created_by")
+}
+
+model ShiftChangeRequest {
+  id          String                  @id @default(cuid())
+  workerId    String                  @map("worker_id")
+  worker      User                    @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  shiftId     String?                 @map("shift_id")
+  requestedDate DateTime              @map("requested_date")
+  reason      String
+  type        String                  @map("type") // CHANGE | SWAP | EXTRA
+  status      String                  @default("PENDING") // PENDING | APPROVED | REJECTED
+  adminNotes  String?                 @map("admin_notes")
+  createdAt   DateTime                @default(now()) @map("created_at")
+  updatedAt   DateTime                @updatedAt @map("updated_at")
+  createdBy   String                  @map("created_by")
+}
+
+model LeaveRequest {
+  id          String        @id @default(cuid())
+  workerId    String        @map("worker_id")
+  worker      User          @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  leaveType   String        @map("leave_type") // CASUAL | SICK | EMERGENCY | UNPAID
+  startDate   DateTime      @map("start_date")
+  endDate     DateTime      @map("end_date")
+  reason      String
+  documentUrl String?       @map("document_url")
+  status      String        @default("PENDING") // PENDING | APPROVED | REJECTED
+  rejectionReason String?    @map("rejection_reason")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  createdBy   String        @map("created_by")
+  reviewedBy  String?       @map("reviewed_by")
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  workerId    String     @map("worker_id")
+  worker      User       @relation("AssignedTasks", fields: [workerId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  priority    String       @default("MEDIUM") // LOW | MEDIUM | HIGH
+  dueDate     DateTime?  @map("due_date")
+  status      String     @default("PENDING") // PENDING | IN_PROGRESS | COMPLETED
+  workerNotes String?    @map("worker_notes")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  createdBy   String     @map("created_by")
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  workerId    String       @map("worker_id")
+  worker      User         @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  type        String       // DAILY | END_OF_SHIFT | INCIDENT | WEEKLY
+  tasksDone   String?      @map("tasks_done")
+  issues      String?
+  notes       String?
+  attachmentUrl String?    @map("attachment_url")
+  adminComment String?     @map("admin_comment")
+  flagged     Boolean      @default(false)
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  createdBy   String       @map("created_by")
+}
+
+model AttendanceLog {
+  id          String   @id @default(cuid())
+  workerId    String   @map("worker_id")
+  worker      User     @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  date        DateTime @map("date")
+  checkIn     DateTime? @map("check_in")
+  checkOut    DateTime? @map("check_out")
+  lateMinutes Int?     @map("late_minutes")
+  status      String?  // PRESENT, ABSENT, LEAVE, etc.
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   String?  @map("created_by")
+}
+
+model Announcement {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  important   Boolean  @default(false)
+  authorId    String   @map("author_id")
+  author      User     @relation("AnnouncementAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdBy   String   @map("created_by")
+  reads       AnnouncementRead[]
+}
+
+model AnnouncementRead {
+  id             String       @id @default(cuid())
+  announcementId String       @map("announcement_id")
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  userId         String       @map("user_id")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readAt         DateTime     @default(now()) @map("read_at")
+  acknowledged   Boolean      @default(false)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  type      String   // LEAVE_DECISION, SHIFT_CHANGE, TASK_ASSIGNED, ANNOUNCEMENT
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+}
