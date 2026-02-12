@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { format } from "date-fns";
 import { SuspendButton } from "./SuspendButton";
+import { AddWorkerForm } from "./AddWorkerForm";
 
 export default async function AdminWorkersPage() {
   const workers = await prisma.user.findMany({
@@ -14,6 +15,17 @@ export default async function AdminWorkersPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-white">Workers</h1>
+
+      <section className="card">
+        <h2 className="mb-3 font-medium text-white">Add worker</h2>
+        <p className="mb-3 text-sm text-gray-400">
+          Workers can only log in with accounts you create here. Share the email and password with them.
+        </p>
+        <AddWorkerForm />
+      </section>
+
+      <section className="card">
+        <h2 className="mb-3 font-medium text-white">Worker list</h2>
       {workers.length === 0 ? (
         <div className="card">
           <p className="text-gray-400">No workers yet.</p>
@@ -54,6 +66,7 @@ export default async function AdminWorkersPage() {
           ))}
         </ul>
       )}
+      </section>
     </div>
   );
 }

@@ -4,27 +4,58 @@
 
 :root {
   --surface: #0f1419;
-  --card: #1a2332;
-  --border: #2d3a4f;
+  --surface-card: #1a2332;
+  --surface-border: #2d3a4f;
   --accent: #3b82f6;
 }
 
+html {
+  background-color: #0f1419;
+}
+
 body {
-  background-color: var(--surface);
+  background-color: #0f1419;
+  color: #f3f4f6;
 }
 
 @layer components {
   .card {
-    @apply rounded-xl border border-surface-border bg-surface-card p-4 shadow-sm;
+    @apply rounded-xl border p-4 shadow-sm;
+    border-color: #2d3a4f;
+    background-color: #1a2332;
   }
   .btn-primary {
-    @apply rounded-lg bg-accent px-4 py-2 font-medium text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-surface;
+    @apply rounded-lg px-4 py-2 font-medium text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2;
+    background-color: #3b82f6;
+  }
+  .btn-primary:focus-visible {
+    box-shadow: 0 0 0 2px #0f1419, 0 0 0 4px #3b82f6;
   }
   .btn-secondary {
-    @apply rounded-lg border border-surface-border bg-surface-card px-4 py-2 font-medium text-gray-200 transition hover:bg-surface-border/50 focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-surface;
+    @apply rounded-lg border px-4 py-2 font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2;
+    border-color: #2d3a4f;
+    background-color: #1a2332;
+    color: #e5e7eb;
+  }
+  .btn-secondary:hover {
+    background-color: rgba(45, 58, 79, 0.5);
+  }
+  .btn-secondary:focus {
+    --tw-ring-color: rgba(255, 255, 255, 0.2);
+    --tw-ring-offset-color: #0f1419;
   }
   .input {
-    @apply w-full rounded-lg border border-surface-border bg-surface-card px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;
+    @apply w-full rounded-lg px-3 py-2 focus:outline-none focus:ring-1;
+    border: 1px solid #2d3a4f;
+    background-color: #1a2332;
+    color: #f3f4f6;
+  }
+  .input::placeholder {
+    color: #6b7280;
+  }
+  .input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
   }
   .badge {
     @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium;

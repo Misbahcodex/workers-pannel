@@ -34,10 +34,10 @@ Operations-focused internal dashboard for workers and staff: view shifts, reques
    ```
    Open [http://localhost:3000](http://localhost:3000).
 
-## Demo login
+## Who can log in
 
-- **Worker:** `worker@company.com` / `worker123`
-- **Admin:** `admin@company.com` / `admin123`
+- **Admin:** Created **only** by running the database seed (e.g. `admin@company.com` / `admin123`). There is no admin signup in the app — no one can create an admin account through the site.
+- **Workers:** Added by the admin from the dashboard (Admin → Workers → Add worker). Workers log in with the email and password the admin set for them.
 
 Workers are redirected to `/worker`, admins to `/admin`.
 

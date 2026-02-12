@@ -25,18 +25,20 @@ In **Vercel** → your project → **Settings** → **Environment Variables**, a
 
 No need to change these unless you use a different package manager.
 
-## 4. Database
+## 4. Database and admin account
 
 - Ensure your database (e.g. Neon) allows connections from Vercel’s IPs (Neon does by default).
-- Run migrations or schema push **before** or **after** first deploy:
-  - Locally: `npx prisma db push`
-  - Seed (once): `npm run db:seed` (run locally with `DATABASE_URL` pointing to the same DB).
+- Run **once** after deploy:
+  - `npx prisma db push`
+  - `npm run db:seed` (run locally with `DATABASE_URL` pointing to your production DB).
+
+The seed creates the **only admin account** (e.g. `admin@company.com` / `admin123`). **No one can sign up as admin** through the app — the admin signup page is disabled. Change the default admin password after first login. Workers are added by the admin from the dashboard.
 
 ## 5. After first deploy
 
 1. Set `NEXTAUTH_URL` to the deployed URL (e.g. `https://workers-amin-pannel.vercel.app`).
 2. Redeploy if you had used a placeholder.
-3. Log in with your seeded user (e.g. `worker@company.com` / `worker123` or `admin@company.com` / `admin123`).
+3. Log in as admin with the seeded credentials, then change the password. Add workers from the admin dashboard.
 
 ## Quick copy-paste (fill in values)
 

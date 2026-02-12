@@ -16,8 +16,8 @@ export default async function RootLayout({
 }) {
   const session = await getServerSession(authOptions);
   return (
-    <html lang="en" className="bg-surface text-gray-100 antialiased">
-      <body className="min-h-screen font-sans">
+    <html lang="en" className="antialiased" style={{ backgroundColor: "#0f1419", color: "#f3f4f6" }}>
+      <body className="min-h-screen font-sans bg-[#0f1419] text-gray-100">
         <SessionProvider session={session}>{children}</SessionProvider>
       </body>
     </html>
